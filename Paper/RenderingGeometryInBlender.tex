@@ -140,9 +140,10 @@ t>/.code={\tikzset{tw@menus@base/.append style={signal to=east}}},
 
 \section*{Introduction}
 
-\subsection{Software/hardware versions used in this document}
+\subsection{Software/hardware versions used in this document --- warning!}
 \begin{itemize}
     \item Blender examples were generated using at least Blender version 3.0.0.
+    \item In versions 3.4 on, the function of the \obj{Transfer Attribute} geometry node has been incorporated into the \obj{Sample Index} node instead. Many of my examples here still reference the \obj{Transfer Attribute} node, but be warned that a node by this name no longer exists in the most recent version of Blender!
     \item All keyboard commands assume PC commands. The main difference vs. Mac is that \keys{\ctrl} becomes \keys{\cmd} (command) on Mac. I'm not sure what else changes. Maybe some keyboard shortcuts that involve keys like \keys{Alt}.
 \end{itemize}
 
@@ -305,7 +306,7 @@ I save the vectors encoding rotation information in an OBJ file, with the vector
         \label{fig:vector_instance_2}
     \end{figure}
     
-    Import the OBJ file containing the rotation info. Add the following nodes: \obj{Object Info}, \obj{Position}, \obj{Transfer Attribute}. In \obj{Object Info}, select the object corresponding to the rotation info. Feed this node and \obj{Position} into \obj{Transfer Attribute}, and set the data type to ``Vector'', mapping type to ``Index'', and domain to ``Point''. This transfers the position of vertices from the rotation object's geometry, which should have the same number of points as there are instances of the arrow geometry.
+    Import the OBJ file containing the rotation info. Add the following nodes: \obj{Object Info}, \obj{Position}, \obj{Transfer Attribute}. In \obj{Object Info}, select the object corresponding to the rotation info. Feed this node and \obj{Position} into \obj{Transfer Attribute}, and set the data type to ``Vector'', mapping type to ``Index'', and domain to ``Point''. This transfers the position of vertices from the rotation object's geometry, which should have the same number of points as there are instances of the arrow geometry. (Note: In future versions of Blender (3.4+), the function of the \obj{Transfer Attribute} node has been incorporated into the \obj{Sample Index} node instead.)
     
     Add the nodes \obj{Align Euler to Vector} and \obj{Rotate Instances}. These two nodes in combination takes in the tangent vectors encoded by our fake rotation object, and produces a rotation that is aligned to the given direction, and aligns each instance to this direction. The ``Axis'' to align (X, Y, or Z) depends on the local axes of the original arrow object; in this example, it happens to be Y. 
     \item We also want to scale the arrows depending on their magnitude. Add a \obj{Vector Math} node, and set it to ``Length''. Feed in the attribute from \obj{Transfer Attribute} into \obj{Length}, and feed this length value into a \obj{Scale Instances} node as one of the components in ``Scale'' (Figure~\ref{fig:vector_instance_3}.)
@@ -378,12 +379,12 @@ I save the vectors encoding rotation information in an OBJ file, with the vector
     
     One way to do this is save yet another file containing the scalar function evaluated at each vector of your vector field, and import this data via nodes. Again, this is a non-optimal way to import attribute data; scripting would be a much better ``one-shot'' way to import data (you could simply write a Python script that reads any data you'd like, in any way you'd like, from any file(s).) 
     
-    The following commands assume Blender 3.2.1. Go to the Geometry Shading editor where you have all the geometry nodes for your vector field set up. Add a \obj{Store Named Attribute} node, and a \obj{Realize Instances} node. (These nodes don't appear in Blender 3.0.0.) Feed the last of nodes controlling the instanced geometry into \obj{Store Named Attribute}. Input the scalar data you want to store on the instances into \obj{Store Named Attribute}, and set the attribute domain to ``Instance'', and set the data type appropriately (in this case, float.) Give a name to your attribute; here I've just named it ``col''. The next node, \obj{Realize Instances}, essentially converts instances to their own geometry, so that we can define attributes on them -- currently there is no direct way to store attributes on instanced geometry. Node configurations are shown in Fig.~\ref{fig:instances_attributes_node}.
+    The following commands assume Blender version 3.2.1 or higher. Go to the Geometry Shading editor where you have all the geometry nodes for your vector field set up. Add a \obj{Store Named Attribute} node. Feed the last of nodes controlling the instanced geometry into the ``Value'' field of \obj{Store Named Attribute}. Input the scalar data you want to store on the instances into \obj{Store Named Attribute}, and set the attribute domain to ``Instance'', and set the data type appropriately (in this case, float.) Give a name to your attribute; here I've just named it ``col''. Node configurations are shown in Fig.~\ref{fig:instances_attributes_node}.
     \begin{figure}[H]
         \centering
         \captionsetup{width=0.8\textwidth}
-        \includegraphics[width=0.9\textwidth]{images/instances_attributes_node.png}
-        \caption{Left: Adding the nodes that will allow us to define an attribute on instanced geometry. Right: The nodes used to extract the scalar field values at the instance samples; in this example, I've stored the values as the x-coordinate of vertex positions in a separate OBJ file.}
+        \includegraphics[width=0.9\textwidth]{images/instances_attributes_node_v2.png}
+        \caption{Left: Adding the nodes that will allow us to define an attribute on instanced geometry. Right: The nodes used to extract the scalar field values at the instance samples; in this example, I've stored the values as the x-coordinate of vertex positions in a separate OBJ file. Note: In future versions of Blender (3.4+), the function of the \obj{Transfer Attribute} node has been incorporated into the \obj{Sample Index} node instead.}
         \label{fig:instances_attributes_node}
     \end{figure}
     
@@ -393,8 +394,8 @@ I save the vectors encoding rotation information in an OBJ file, with the vector
     \begin{figure}[H]
         \centering
         \captionsetup{width=0.8\textwidth}
-        \includegraphics[width=\textwidth]{images/color_instances_luminance_nodes.png}
-        \caption{The updated node configuration in the Shader editor. Probably a better way to do the inverse mapping (instead of the math nodes I used), is to simply use an \obj{Invert} node.}
+        \includegraphics[width=\textwidth]{images/color_instances_luminance_nodes_v2.png}
+        \caption{The updated node configuration in the Shader editor. Maybe a better way to do the inverse mapping (instead of the math nodes I used), is to simply use an \obj{Invert} node.}
         \label{fig:color_instances_luminance}
     \end{figure}
     \item Here's the final render. Throughout this example, I've prevented the arrows from having shadows rendered on them because I find them distracting in this particular example (\menu{Properties > Object Properties > Visibility > Ray Visibility} and uncheck ``Shadow''.) % In this particular render, I've also upped the saturation and brightness of the colors because the colors looked a bit dark before, by setting the S and V values of the mesh colors, in HSV representation, to 1.0. On the other hand, this might mess with the perceptual effectiveness of the colormap, so... maybe don't do this.
@@ -402,7 +403,7 @@ I save the vectors encoding rotation information in an OBJ file, with the vector
         \centering
         \captionsetup{width=0.8\textwidth}
         \includegraphics[width=0.9\textwidth]{images/vector_field_final_render.png}
-        \caption{The ``final'' render. We would probably still want to make some tweaks to make the render look even better; see the sections on materials, lighting, and Section~\ref{sec:prettification} for more tips.}
+        \caption{The ``final'' render. We would probably still want to make some tweaks to make the render look even better; see the sections on materials, lighting, and Section~\ref{sec:Prettification} for more tips.}
     \end{figure}
 \end{enumerate}
 

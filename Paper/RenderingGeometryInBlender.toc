@@ -1,0 +1,52 @@
+\contentsline {subsection}{\numberline {0.1}Software/hardware versions used in this document --- warning!}{3}{subsection.0.1}%
+\contentsline {subsection}{\numberline {0.2}Notation}{3}{subsection.0.2}%
+\contentsline {subsection}{\numberline {0.3}Acknowledgements}{3}{subsection.0.3}%
+\contentsline {subsection}{\numberline {0.4}Sections still being filled out!}{3}{subsection.0.4}%
+\contentsline {section}{\numberline {1}Rendering scalar data}{4}{section.1}%
+\contentsline {section}{\numberline {2}Rendering points}{8}{section.2}%
+\contentsline {section}{\numberline {3}Rendering vector data}{8}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Vector fields}{8}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Streamlines}{18}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Rendering data with more than 3 dimensions}{18}{section.4}%
+\contentsline {section}{\numberline {5}Rendering curves}{18}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Basics}{18}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Making curves lie flat against a surface}{19}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Assigning UV coordinates}{19}{subsection.5.3}%
+\contentsline {section}{\numberline {6}Lighting}{20}{section.6}%
+\contentsline {subsection}{\numberline {6.1}World lighting}{20}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Directional lighting}{22}{subsection.6.2}%
+\contentsline {section}{\numberline {7}Shadows}{23}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Cast shadows}{23}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Non-physically-based shadows}{27}{subsection.7.2}%
+\contentsline {section}{\numberline {8}Function visualization}{27}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Setting colormaps}{27}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Rendering isolines}{29}{subsection.8.2}%
+\contentsline {subsubsection}{\numberline {8.2.1}Using trig functions}{29}{subsubsection.8.2.1}%
+\contentsline {subsubsection}{\numberline {8.2.2}Using modular arithmetic}{32}{subsubsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.3}Accurate colormapping}{32}{subsection.8.3}%
+\contentsline {section}{\numberline {9}Materials}{32}{section.9}%
+\contentsline {section}{\numberline {10}Additional visual effects}{32}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Adjust saturation/lightness}{32}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Rim light effect}{33}{subsection.10.2}%
+\contentsline {section}{\numberline {11}Common rendering settings}{33}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Rendering the final image}{33}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}Smooth shading}{34}{subsection.11.2}%
+\contentsline {subsection}{\numberline {11.3}Eevee vs. Cycles}{34}{subsection.11.3}%
+\contentsline {subsection}{\numberline {11.4}Rendering images with transparency}{34}{subsection.11.4}%
+\contentsline {subsection}{\numberline {11.5}View render with a transparent background against a white background}{35}{subsection.11.5}%
+\contentsline {section}{\numberline {12}Viewport options}{35}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Viewport shading}{35}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Changing viewport appearance}{35}{subsection.12.2}%
+\contentsline {section}{\numberline {13}Scripting}{36}{section.13}%
+\contentsline {section}{\numberline {14}Useful keyboard shortcuts}{36}{section.14}%
+\contentsline {subsection}{\numberline {14.1}Change view in viewport}{36}{subsection.14.1}%
+\contentsline {section}{\numberline {15}FAQs}{36}{section.15}%
+\contentsline {subsection}{\numberline {15.1}How do I delete \underline {\hspace {1cm}}?}{36}{subsection.15.1}%
+\contentsline {subsection}{\numberline {15.2}How do I disconnect a node?}{36}{subsection.15.2}%
+\contentsline {subsection}{\numberline {15.3}How do I preview the object before rendering?}{37}{subsection.15.3}%
+\contentsline {subsection}{\numberline {15.4}How do I use a different camera to render images, without adjusting the current camera?}{37}{subsection.15.4}%
+\contentsline {section}{\numberline {16}Gotchas}{37}{section.16}%
+\contentsline {subsection}{\numberline {16.1}Your scene probably needs a lot more light than you think}{37}{subsection.16.1}%
+\contentsline {subsection}{\numberline {16.2}Color management}{37}{subsection.16.2}%
+\contentsline {subsection}{\numberline {16.3}Receiving terminal output}{37}{subsection.16.3}%
+\contentsline {part}{I\hspace {1em}Animations}{37}{part.1}%

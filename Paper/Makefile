@@ -2,7 +2,7 @@ TARGET = RenderingGeometryInBlender
 DIFFVERSION = 
 
 all:
-	pdflatex $(TARGET)
+	pdflatex --shell-escape $(TARGET)
 	open $(TARGET).pdf
 
 diff:
