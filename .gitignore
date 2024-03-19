@@ -4,7 +4,12 @@
 RenderingGeometryInBlender.pdf
 
 # TeX build
+_minted*
+svg-inkscape/
+*.toc
+*.aux
 *.log
+*.out
 
 # Build directories
 build/

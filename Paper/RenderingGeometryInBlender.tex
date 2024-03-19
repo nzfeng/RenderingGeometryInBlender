@@ -143,8 +143,8 @@ t>/.code={\tikzset{tw@menus@base/.append style={signal to=east}}},
 \subsection{Software/hardware versions used in this document --- warning!}
 \begin{itemize}
     \item Blender examples were generated using at least Blender version 3.0.0.
-    \item In versions 3.4 on, the function of the \obj{Transfer Attribute} geometry node has been incorporated into the \obj{Sample Index} node instead. Many of my examples here still reference the \obj{Transfer Attribute} node, but be warned that a node by this name no longer exists in the most recent version of Blender!
-    \item All keyboard commands assume PC commands. The main difference vs. Mac is that \keys{\ctrl} becomes \keys{\cmd} (command) on Mac. I'm not sure what else changes. Maybe some keyboard shortcuts that involve keys like \keys{Alt}.
+    \item In versions 3.4 and beyond, the function of the \obj{Transfer Attribute} geometry node has been incorporated into the \obj{Sample Index} node instead. Many of my examples here still reference the \obj{Transfer Attribute} node, but be warned that a node by this name no longer exists in the most recent version of Blender!
+    \item There will be some difference between Mac and PC commands. The main difference vs. Mac is that \keys{\ctrl} becomes \keys{\cmd} (command) on Mac. I'm not sure what else changes. Maybe some keyboard shortcuts that involve keys like \keys{Alt}. Throughout the document I try to describe both types of keyboard commands.
 \end{itemize}
 
 \subsection{Notation}
@@ -158,17 +158,17 @@ t>/.code={\tikzset{tw@menus@base/.append style={signal to=east}}},
 \subsection{Acknowledgements}
 \begin{itemize}
     \item A lot of fundamental tips are from Mark Gillespie, who I pestered a lot when I first attempted to use Blender to render some research results.
-    \item Silvia Sell\'an has a good \href{https://www.silviasellan.com/blender_figure.html}{startup tutorial} on rendering figures for graphics and geometry papers (how to choose lighting, materials.) I followed the links in her tutorial to get PBR materials and some nice paper-like materials.
+    \item Silvia Sell\'an has a good \href{https://www.silviasellan.com/blender_figure.html}{beginner's tutorial} on rendering figures for graphics and geometry papers (including steps on setting up lighting and materials.) Her has links to some PBR materials and some nice paper-like materials.
     \item Derek Liu has another small Blender tutorial and a \href{https://github.com/HTDerekLiu/BlenderToolbox}{bunch of scripts} for rendering geometry.
 \end{itemize}
 
 \subsection{Sections still being filled out!}
-This document primarily keeps track of rendering processes I've personally used, so I don't forget how I did them. There are still many sections that haven't been filled out, and topics that haven't been added yet. This document will keep growing over time as I get to them. In the meantime, check out the Blender documentation, and other people's tutorials on Stack Exchange, YouTube.
+This document primarily keeps track of rendering processes I've personally used, mostly so I don't forget how I did them. There are still sections that haven't been filled out, and topics that haven't been added yet. This document will keep growing over time as I get to them. In the meantime, check out the Blender documentation, and other people's tutorials on Stack Exchange, YouTube.
 
 \newpage 
 
-\section{Rendering scalar data}
-\label{sec:scalar_data}
+\section{Rendering scalar data on surface meshes}
+\label{sec:RenderingScalarDataOnSurfaceMeshes}
 We will take advantage of Blender's built-in support for UV maps. Normally, UV maps are used for texture mapping; the uv coordinates of each vertex are the 2d coordinates that indicate the corresponding location in the UV layout (the 2D texture image). We will store our scalar data in one of the uv coordinates; load the UV map into Blender; and extract the uv data to render as a colormap.
 
 \begin{enumerate}
@@ -245,12 +245,13 @@ We will take advantage of Blender's built-in support for UV maps. Normally, UV m
 
 When your data gets more complicated, there is typically more information you want to specify than can be stored in an OBJ file. For example, for a vector field you want to specify (1) the 3D positions of each vector; (2) RGB colors for each vector; (3) possible more information for each vector...
 
-A common approach to store the extra information is to co-opt the texture coordinates and normal information in an OBJ file. Personally, I find it's easier to simply store all this info as the vertex positions of a *separate* OBJ file -- this approach has the benefit that you don't have to re-write your OBJ file representing your mesh every time you simply make a change in how you want the mesh to be rendered. It also seems easier to me to explicitly keep track of each type of quantity you're using to render the mesh.
+A common approach to store the extra information is to co-opt the texture coordinates and normal information in an OBJ file. Personally, I find it's easier to simply store all this info as the vertex positions of a *separate* OBJ file -- this approach has the benefit that you don't have to re-write your OBJ file representing your mesh every time you simply make a change in how you want the mesh to be rendered. It also seems easier to me to explicitly keep track of each type of quantity you're using to render the mesh, though of course it's possible to update the instructions that follow to take different types of input.
 
 \subsection{Vector fields}
-To render a vector field, typically you want to display a little arrow for each vertex or face in a mesh. We will do this in Blender via \emph{instancing}, which copies an object to multiple points. Once arrows have been instanced to each vertex/face, we can display our vector field by controlling the local rotation of each arrow. One way to do that is to write out each arrow's tangent vector in world coordinates (i.e. embedded in $\R^3$), read data from this file via a script in Blender, and use the \obj{Align Euler to Vector} node to align each arrow to the corresponding direction.
+\label{sec:VectorFields}
+To render a vector field, typically you want to display a little arrow for sampled point in a domain. We will do this in Blender via \emph{instancing}, which copies an object to multiple points. Once arrows have been instanced to each sample point, we can display our vector field by controlling the local rotation of each arrow. One way to do that is to write out each arrow's direction in world coordinates (meaning as a vector in $\R^3$), read data from this file via a script in Blender, and use the \obj{Align Euler to Vector} node to align each arrow to the corresponding direction. In what follows below, I will describe the process of rendering tangent vectors on a surface mesh --- though this process can also be adapted to the (simpler) process of rendering a collection of vectors in a 3D volume.
 
-I save the vectors encoding rotation information in an OBJ file, with the vectors as vertex positions. A straightforward way to display a vector field is to have one vector per vertex or face, although for finely-tessellated meshes this will produce a vector field that is too densely sampled and makes for a poor visualization. A better approach is to use some method for \href{https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf}{Poisson Disk Sampling}, which was used in the \href{https://www.cs.cmu.edu/~kmcrane/Projects/VectorHeatMethod/paper.pdf}{Vector Heat Method paper}.
+I save the vectors encoding rotation information in an OBJ file, with the vectors as vertex positions --- I personally find this the most straightforward way to get collections of 3-tuples into Blender. A straightforward way to display a vector field is to have one vector per vertex or face, although for finely-tessellated meshes this will produce a vector field that is too densely sampled and makes for a poor visualization. A better approach is to use some method for \href{https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf}{Poisson Disk Sampling}, which was used, for instance, in the \href{https://www.cs.cmu.edu/~kmcrane/Projects/VectorHeatMethod/paper.pdf}{Vector Heat Method paper} --- I've implemented Poisson disk sampling in the C++ geometry processing library \href{https://geometry-central.net/surface/algorithms/surface_sampling/}{geometry-central}, though similar variants are implemented other software (\href{https://www.meshlab.net/}{MeshLab}, for one.)
 
 \begin{enumerate}
     \item For better control of geometry in Blender, we can use Geometry Nodes. The Geometry Nodes editor can be accessed by clicking the \Menu[t>]{Geometry Nodes} tab (shown in Figure~\ref{fig:geometry-nodes_tab}.)
@@ -347,7 +348,7 @@ I save the vectors encoding rotation information in an OBJ file, with the vector
         \begin{subfigure}[b]{\textwidth}
          \centering
          \includegraphics[width=\textwidth]{images/vector_instance_random-cull_nodes.png}
-         \caption{The updated node configuration for randomly culling instances, if you wanted to do something similar. New nodes added in this step are indicated in red.}
+         \caption{The updated node configuration for randomly culling instances, in case you wanted to do something similar. New nodes added in this step are indicated in red.}
         \end{subfigure} \\
         \begin{subfigure}[b]{\textwidth}
          \centering
@@ -357,7 +358,7 @@ I save the vectors encoding rotation information in an OBJ file, with the vector
         \caption{Randomly culling arrows provides an uneven sampling. Do NOT do this.}
         \label{fig:vector_instance_random-cull}
     \end{figure}
-    A better method is to use something like Poisson Disk Sampling; the Vector Heat Method paper used \href{https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf}{this method by Bridson}. It's easiest to implement the sampling algorithm in the code you used to generate the file containing the vector information, i.e. not via Blender. As of writing this section (July 2022), I've added a PoissonDiskSampler class to Geometry Central; hopefully it should have been integrated by time someone actually uses this document.
+    A better method is to use something like Poisson Disk Sampling; the Vector Heat Method paper used \href{https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf}{this method by Bridson}. It's easiest to implement the sampling algorithm in the code you used to generate the file containing the vector information, so probably not via Blender. As of writing this section (July 2022), I've added a \texttt{PoissonDiskSampler} class to \href{https://geometry-central.net/}{geometry-central}, though implementations of Poisson disk sampling for surface meshes also exist in \href{https://www.meshlab.net/}{MeshLab}, among other software.
     \item Now I've implemented the Poisson disk sampling algorithm mentioned in the previous step, and re-written the OBJ file containing rotation information. Specifically, I've written one OBJ file that contains the locations at which vectors are sampled (as vertex positions), and a second OBJ file that contains the corresponding vectors at those sampled locations (also as vertex positions.) Ideally I would have stored the vectors as vertex normals within the first OBJ file, but I had trouble getting Blender to recognize them. Now our vector field looks like this:
     \begin{figure}[H]
         \centering
@@ -377,14 +378,14 @@ I save the vectors encoding rotation information in an OBJ file, with the vector
     \end{figure}
     \item As an optional visual tweak, you may want to adjust the darkness of your arrows to be inversely proportional to the darkness of the underlying mesh, for optimal contrast between the arrows and the surface mesh.
     
-    One way to do this is save yet another file containing the scalar function evaluated at each vector of your vector field, and import this data via nodes. Again, this is a non-optimal way to import attribute data; scripting would be a much better ``one-shot'' way to import data (you could simply write a Python script that reads any data you'd like, in any way you'd like, from any file(s).) 
+    One way to do this is save yet another file containing the scalar function evaluated at each vector of your vector field, and import this data via nodes. Again, this may be a non-optimal way to import attribute data; scripting may be a much better ``one-shot'' way to import data (you could write a Python script that reads any data you'd like, in any way you'd like, from any file(s)), but so far this method has been reasonably efficient for me.
     
     The following commands assume Blender version 3.2.1 or higher. Go to the Geometry Shading editor where you have all the geometry nodes for your vector field set up. Add a \obj{Store Named Attribute} node. Feed the last of nodes controlling the instanced geometry into the ``Value'' field of \obj{Store Named Attribute}. Input the scalar data you want to store on the instances into \obj{Store Named Attribute}, and set the attribute domain to ``Instance'', and set the data type appropriately (in this case, float.) Give a name to your attribute; here I've just named it ``col''. Node configurations are shown in Fig.~\ref{fig:instances_attributes_node}.
     \begin{figure}[H]
         \centering
         \captionsetup{width=0.8\textwidth}
         \includegraphics[width=0.9\textwidth]{images/instances_attributes_node_v2.png}
-        \caption{Left: Adding the nodes that will allow us to define an attribute on instanced geometry. Right: The nodes used to extract the scalar field values at the instance samples; in this example, I've stored the values as the x-coordinate of vertex positions in a separate OBJ file. Note: In future versions of Blender (3.4+), the function of the \obj{Transfer Attribute} node has been incorporated into the \obj{Sample Index} node instead.}
+        \caption{Left: Adding the nodes that will allow us to define an attribute on instanced geometry. Right: The nodes used to extract the scalar field values at the instance samples; in this example, I've stored the values as the x-coordinate of vertex positions in a separate OBJ file. \textit{Note:} In newer versions of Blender (3.4+), the function of the \obj{Transfer Attribute} node has been incorporated into the \obj{Sample Index} node instead.}
         \label{fig:instances_attributes_node}
     \end{figure}
     
@@ -403,14 +404,15 @@ I save the vectors encoding rotation information in an OBJ file, with the vector
         \centering
         \captionsetup{width=0.8\textwidth}
         \includegraphics[width=0.9\textwidth]{images/vector_field_final_render.png}
-        \caption{The ``final'' render. We would probably still want to make some tweaks to make the render look even better; see the sections on materials, lighting, and Section~\ref{sec:Prettification} for more tips.}
+        \caption{The ``final'' render. I'd personally still want to tweak the color gradient of the arrows, since the white arrows against the yellow portion of the surface are a bit hard to see. We would probably still want to make some tweaks to make the render look even better; see the sections on materials, lighting, and Section~\ref{sec:Prettification} for more tips.}
     \end{figure}
 \end{enumerate}
 
 \subsection{Streamlines}
+\textbf{TODO}:
 
 \section{Rendering data with more than 3 dimensions}
-Probably easiest to do a Python script; see answers like \href{https://blender.stackexchange.com/a/118494}{this one.}
+\textbf{TODO}: Probably easiest to do by using more than one file as input (and combining inputs appropriately), or co-opting other data-types in the same file. Or perhaps a Python script; see answers like \href{https://blender.stackexchange.com/a/118494}{this one.}
 
 \section{Rendering curves}
 \subsection{Basics}
@@ -435,7 +437,7 @@ Additional options:
     \item To prevent the curves from casting a shadow on other objects, you must have selected``Cycles'' as the render engine (Section~\ref{subsec:eevee_vs_cycles}). Make sure the curve object is selected in the viewport, then go to \menu{Properties > Object properties} \inlinepic{images/object-properties-icon.png} and \directory{Visibility / Ray visibility} and uncheck the ``Shadow'' box. You might want this feature, for example, if you're rendering curves that lie along a surface, and you want the curves to have volume but not cast distracting shadows on the surface.
 \end{itemize}
 
-% As discussed in Section~\ref{sec:scalar_data}, you can store data in UV maps to use as rendering info. Figure~\ref{fig:colored_curve} is an example of using UV coordinates to color the vertices of the curve, and Figure~\ref{fig:alpha_curve} is an example of using UV coordinates to control the transparency (alpha values) of the curve. Although the curve is beveled, the coloring is done per vertex of the underlying control curve. (TODO: I have yet to figure out how exactly the UV values map on to elements of the curve; can't tell if it is doing per vertex, per halfedge, etc. I actually have no idea what it's doing.)
+% As discussed in Section~\ref{sec:RenderingScalarDataOnSurfaceMeshes}, you can store data in UV maps to use as rendering info. Figure~\ref{fig:colored_curve} is an example of using UV coordinates to color the vertices of the curve, and Figure~\ref{fig:alpha_curve} is an example of using UV coordinates to control the transparency (alpha values) of the curve. Although the curve is beveled, the coloring is done per vertex of the underlying control curve. (TODO: I have yet to figure out how exactly the UV values map on to elements of the curve; can't tell if it is doing per vertex, per halfedge, etc. I actually have no idea what it's doing.)
 % \begin{figure}[H]
 %     \centering
 %     \captionsetup{width=0.8\textwidth}
@@ -453,10 +455,11 @@ Additional options:
 % \end{figure}
 
 \subsection{Making curves lie flat against a surface}
+{\bf TODO: This section under heavy construction --- not safe for reading. I've found a way to do this using Geometry Nodes, but it's still not perfect.}
 If you're rendering curves that lie along a surface and want the curves to lie flat on the surface, I have no idea how to do this. I tried for ages fiddling with the Bevel options and constructing my own Bevel (which is an option in Blender 3.0+), but it seems like the beveled curve will always have thickness. I suppose a solution is to construct your own polygon strip from the curve, and export that as a mesh.
 
 \subsection{Assigning UV coordinates}
-{\bf TODO: Under construction}
+{\bf TODO: This section under heavy construction --- not safe for reading}
 Unfortunately, Blender doesn't have a way to store info along a Curve -- you're only able to store UV coordinates if the Curve has been converted into Mesh, from which there doesn't appear to be a way to determine the coordinates corresponding to the control points of the original curve. This stinks, because a lot of the time we want to store per-vertex or per-segment attributes for a Curve, and this prevents us from doing so.
 
 What's kind of silly is that Curves \emph{do} have UV maps in Blender -- it's just that there's no way to change it. The auto-generated UV map for a Curve divides the UV space more-or-less linearly between the points of the curve. So for example, you can use these UV coordinates to render simple gradients that interpolate from 0 at one end to 1 at the other end of the curve:
@@ -488,12 +491,15 @@ Warning: How you bevel the Curve might also stretch the UV map in unexpected way
 
 \section{Lighting}
 \label{sec:Lighting}
-First delete any default lights that come with the scene.
+First delete any default lights that come with the Blender file. The default lighting will almost certainly not be able to provide the best lighting for your scene.
 
 \subsection{World lighting}
-Blender comes with a bunch of default materials and light sources. You can view these resources by navigating to the Blender application, right-clicking and selecting ``Show Package Contents'' (on Mac.) The directory \directory{Contents / Resources / [version] / datafiles / studiolights / world} contains some nice default lights that will illuminate the scene from all angles. In Linux, you also navigate to where your Blender application is located, and go to \directory{[version] / datafiles / studiolights}.
 
-Typically I don't use environment lights; usually I find that adding a few area lights works better. (See Section~\ref{sec:DirectionalLighting})
+Typically I don't use environment (world) lighting; usually I find that adding a few area lights works better. (See Section~\ref{sec:DirectionalLighting}). But occasionally I find it useful --- especially for larger scenes that contain more than a few objects, such as the ``Planet Cow'' scenes from my \href{https://nzfeng.github.io/research/WNoDS/index.html}{talk on winding numbers} --- so here are some steps on the process.
+
+Blender comes with a bunch of default materials and light sources. You can view these resources by navigating to the Blender application, and on Mac OS, right-clicking and selecting ``Show Package Contents''. The directory \directory{Contents / Resources / [version] / datafiles / studiolights / world} contains some nice default lights that will illuminate the scene from all angles. In Linux, you also navigate to where your Blender application is located, and go to \directory{[version] / datafiles / studiolights}.
+
+
 
 \begin{enumerate}
 \item Enter the Shading editor (see Figure~\ref{fig:shading_tab}.) In the upper left corner of the Shader editor, select ``World'' data from the drop-down menu:
@@ -515,15 +521,22 @@ Typically I don't use environment lights; usually I find that adding a few area 
 
 \subsection{Directional lighting}
 \label{sec:DirectionalLighting}
-Instead of adding environment lights, I almost always add specific, directional lights (typically area lights) to create aesthetically-pleasing self-shadows on the object, which I find gives the object a sense of ``3D-ness'' and ``3D placement''. 
+
+For scenes focused on only one or a few items, instead of adding environment lights I almost always add specific, directional lights (typically area lights) to create aesthetically-pleasing self-shadows on the object, which I find gives the object a sense of ``3D-ness'' and ``3D placement''. 
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=4in]{images/adding-area-light.png}
     \caption{How to add an area light.}
 \end{figure}
-Usually I add 4 -- 5 area lights to illuminate the object from multiple sides. A quick way to add more lights is to duplicate an existing light (\keys{Shift + D}.) I fiddle with the angle and power of the lights, toggling the camera view and using the ``Rendered'' viewport shading to see how the object looks (FAQ~\ref{sec:FAQ-camera-view}), until I'm reasonably satisfied that the object is well-lit (Figure~\ref{object-with-directional-lights}.) 
+
+\subsubsection{The area lights method}
+I rarely use this method, but I've listed it for completeness (I usually use Sun lights instead, described in Section~\ref{sec:TheSunLightMethod}.) 
+
+I add a few area lights to illuminate the object from multiple sides. A quick way to add more lights is to duplicate an existing light (\keys{Shift + D}.) I fiddle with the angle and power of the lights, toggling the camera view and using the ``Rendered'' viewport shading to see how the object looks (FAQ~\ref{sec:FAQ-camera-view}), until I'm reasonably satisfied that the object is well-lit (Figure~\ref{object-with-directional-lights}.) 
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=5in]{images/object-with-directional-lights.png}
     \caption{An example of a scene with several directional lights added.}
     \label{fig:object-with-directional-lights}
@@ -533,17 +546,39 @@ The power of the lights can be adjusted under \menu{Properties > Object Data Pro
 
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=2in]{images/area-light-settings.png}
     \caption{The light settings underneath \menu{Properties > Object Data Properties} (the \inlinepic{images/object-data-properties-light.png} icon.) Here, you can change the light's strength, or switch to a different type of light if needed. \label{fig:area-light-settings}}
 \end{figure}
+
+\subsubsection{The Sun light method}
+\label{sec:TheSunLightMethod}
+For typical single-object scenes, usually I only add one single ``Sun''-type light, which I usually find is enough to both illuminate the object sufficiently, and result in visually-pleasing shadows that are not too complicated. After adding a Sun light, I simply play with the X-, Y-, and Z-``Rotation'' parameters (by dragging the corresponding input boxes left and right) until the scene's objects have self-shadows that look good to me. For most of my scenes, I find that I usually have to increase the light's power $\sim$4000 watts (Figure~\ref{fig:area-light-settings}).
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{width=0.8\textwidth}
+    \includegraphics[width=6in]{images/SunLightRotations.png}
+    \caption{\textit{Left:} Adding a Sun light. \textit{Right:} Under \menu{Properties > Object Properties} (the \inlinepic{images/object-properties-icon.png} icon), I simply play with the X-, Y-, and Z-``Rotation'' parameters (by dragging the corresponding input boxes left and right) until the scene's objects have self-shadows that look good to me. \label{fig:SunLightRotations}}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{width=0.8\textwidth}
+    \includegraphics[width=3in]{images/DragonSunLit.png}
+    \caption{An example of an object lit using a single Sun light --- the next section details the steps used to create the shadow. For more examples, see \href{}{this paper} where I lit every 3D scene with this method. \label{fig:BlockSunLit}}
+\end{figure}
+
 
 \section{Shadows}
 \label{sec:Shadows}
 
 \subsection{Cast shadows}
-Typically one adds a plane onto which the shadow from the object is cast. To add a plane, go to \menu{Add > Mesh > Plane}.
+
+Rendered images are often lent a greater degree of ``realness'' and sense of 3D placement in the context of a paper when rendered with a cast shadow. This is usually done by adding an ``invisible'' plane onto which the shadow from the object is cast. To add a plane, go to \menu{Add > Mesh > Plane}.
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=4in]{images/add-a-plane-mesh.png}
     \caption{How to add a plane mesh.}
 \end{figure}
@@ -552,46 +587,50 @@ Make the plane big enough so that it captures all of the object's shadow by scal
 To have the plane catch shadows but not actually be rendered in the final render, select the plane and turn on the ``Shadow Catcher'' option: Go to \menu{Properties > Object Data Properties > Visibility > Shadow Catcher}. You must be using the Cycles render engine, not Eevee, to use Shadow Catcher.
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=4in]{images/shadow-catcher-option.png}
-    \caption{Turning on the Shadow Catcher option. This option is most often used for ground planes that are used to render shadows on an invisible ``ground''.}
+    \caption{Turning on the Shadow Catcher option. This option is often used for ground planes that are used to render shadows on an invisible ``ground''.}
     \label{fig:shadow-catcher-option}
 \end{figure}
 
-Usually, the light settings that best illuminate the scene objects well, such as those shown in Figure~\ref{object-with-directional-lights}, are not ideal for generating clean-cut, well-positioned, aesthetically-pleasing cast shadows. I usually therefore create a second set of lights specifically for creating the shadow. To keep these lights logically separate from the original scene items, I add a new scene ``collection'' by right-clicking on ``Scene Collection'' in the \menu{Outliner} menu in the upper-right (Figure~\ref{adding-a-new-collection}.)
+Usually, the light settings that best illuminate the scene objects well, such as those shown in Figure~\ref{object-with-directional-lights}, are \textit{not} simultaneously ideal for generating clean-cut, well-positioned, aesthetically-pleasing cast shadows. I usually therefore create a second set of lights specifically for creating the shadow. To keep these lights logically separate from the original scene items, I add a new scene ``collection'' by right-clicking on ``Scene Collection'' in the \menu{Outliner} menu in the upper-right (Figure~\ref{adding-a-new-collection}.)
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=4in]{images/adding-a-new-collection.png}
     \caption{Adding a new collection.}
     \label{fig:adding-a-new-collection}
 \end{figure}
-To this new collection, I add all the objects that are needed to make the shadow: the ground plane; a copy of the scene object(s), and additional light(s) that I've fiddled around with and deemed to make a good shadow. If the scene object(s) are particularly high-res and adding copies of them would slow the Blender \& the rendering process down considerably, I just add coarsened versions of the objects (you don't need high-res objects to generate the shadows, which are fuzzy anyway!) Next, you want to select the ``Holdout'' option under \menu{Object Properties > Visibility}, which takes an object's occlusion into account in the render, without rendering the object itself:
+To this new collection, I add all the objects that are needed to make the shadow: the ground plane; a copy of the scene object(s), and additional light(s) that I've fiddled around with and deemed to make a good shadow. If the scene object(s) are particularly high-resolution and adding copies of them would slow the Blender \& the rendering process down considerably, I just add lower-resolution versions of the objects (you don't need high-res objects to generate the shadows, which are fuzzy anyway!) Next, you want to select the ``Holdout'' option under \menu{Object Properties > Visibility}, which takes an object's occlusion into account in the render, without rendering the object itself:
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=4in]{images/holdout.png}
     \caption{Setting an object to rendered as ``holdout.''}
     \label{fig:holdout}
 \end{figure}
-For the light that generates the shadow, I usually add a ``Sun''-type light to make the shadow, as it tends to make the most clean-cut shadow whose positioning is easiest to control. I usually just place the sun somewhere above the scene objects; then fiddle around with its rotation under \menu{Object Properties > Rotation} (\inlinepic{images/object-properties-icon.png}) until the shadow looks okay to me in the viewport's render preview. Further, you can adjust the fuzziness of the shadow's outlines by increasing the ``Angle'' option in the light's \menu{Object Data Properties} (\inlinepic{images/object-data-properties-light.png}). An angle of $0^\circ$ will create a crisp shadow, while $2^\circ$ -- $4^\circ$ is usually enough to make a nice-looking ``fuzzy'' shadow.
+For the light that generates the shadow, I usually add a ``Sun''-type light to make the shadow, as it tends to make the most clean-cut shadow whose positioning is easiest to control. I usually just place the sun somewhere above the scene objects; then fiddle around with its rotation under \menu{Object Properties > Rotation} (\inlinepic{images/object-properties-icon.png}) until the shadow looks okay to me in the viewport's render preview. Further, you can adjust the fuzziness of the shadow's outlines by increasing the ``Angle'' option in the light's \menu{Object Data Properties} (\inlinepic{images/object-data-properties-light.png}). An angle of $0^\circ$ will create a crisp shadow, while $2^\circ$ --- $4^\circ$ is usually enough to make a nice-looking ``fuzzy'' shadow. (I usually just use $0^\circ$.)
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=3in]{images/sun-options.png}
-    \caption{Adjusting the options of the ``Sun'' light to tune the resulting shadow. Increasing the angle will create a shadow with a fuzzier outline.}
+    \caption{Adjusting the options of the ``Sun'' light to tune the resulting shadow. Increasing the angle will create a shadow with a fuzzier outline; I usually just use $0^\circ$. For most of my scenes, I usually increase the light's power $\sim$4000 watts, and set the ground plane's alpha value in the \menu{Shading} editor to 0.600, though I imagine these parameters will be somewhat scene-dependent.}
     \label{fig:sun-options}
 \end{figure}
-Oftentimes, the shadow is initially too dark. The easiest way to remedy this is to change the alpha value of the ground plane: Go to the \menu{Shading} editor, select the plane, and set its alpha value to something less than 1.
+Sometimes the shadow is initially too dark. The easiest way to remedy this is to change the alpha value of the ground plane: Go to the \menu{Shading} editor, select the plane, and set its alpha value to something less than 1. For most of my scenes, I usually set the ground plane's alpha value 0.600.
 
 We are now able to render two images separately: One containing just the lit and shaded object (no ground shadow, only self-shadows), and a second containing just the ground shadow. To render the two scene collections separately, toggle the camera icon next to the collection (``Disable in renders'', \inlinepic{images/disable-in-viewport-render.png}.) To avoid confusing myself, I always also toggle the ``Hide in viewport'' option as well (the eye icon) at the same time.
 \begin{figure}[H]
     \centering
     \captionsetup{width=0.8\textwidth}
-    \begin{subfigure}[b]{0.9\textwidth}
+    \begin{subfigure}[b]{0.4\textwidth}
      \centering
-     \includegraphics[width=0.4\textwidth]{images/collection-on-shadow-off.png}
+     \includegraphics[width=0.9\textwidth]{images/collection-on-shadow-off.png}
      \caption{The lit and shaded objects will be rendered; the shadows are disabled.}
-    \end{subfigure} 
-    \begin{subfigure}[b]{0.9\textwidth}
+    \end{subfigure} \hspace{3mm}
+    \begin{subfigure}[b]{0.4\textwidth}
      \centering
-     \includegraphics[width=0.4\textwidth]{images/collection-off-shadow-on.png}
+     \includegraphics[width=0.9\textwidth]{images/collection-off-shadow-on.png}
      \caption{The lit and shaded objects are disabled from the render; the shadows will be rendered.}
     \end{subfigure}
     \caption{Rendering the scene objects separately from their shadows.}
@@ -600,6 +639,7 @@ We are now able to render two images separately: One containing just the lit and
 After rendering these two images separately, I composite these two images together for the final figure (I use Adobe Illustrator.)
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=3in]{images/final-render-with-shadow.png}
     \caption{The rendered object composited with its shadow.}
     \label{fig:final-render-with-shadow}
@@ -607,13 +647,13 @@ After rendering these two images separately, I composite these two images togeth
 
 \subsection{Non-physically-based shadows}
 \label{sec:CartoonShadows}
-Alternatively, you can add a ``shadow'' in a 2D graphics editor like Adobe Illustrator that appears physically correct. Creating a shadow in this manner will be easier with regards to controlling the extent of the shadow, its shape, its crispness, etc. However, the shadow will almost inevitably have a more cartoonish/cel-shaded aesthetic to it. This might fit exactly into your aesthetic goals for the figure -- or it might make your render look fake and funny, so you should exercise good judgement! % Sometimes physically-accurate shadows can be too complicated and distracting, and you desire a more streamlined figure that's a blend between realistically ray-traced \& a diagram/didactic feel.
+Alternatively, you can add a ``shadow'' in a 2D graphics editor like Adobe Illustrator that only appears physically correct. Creating a shadow in this manner will be easier with regards to controlling the extent of the shadow, its shape, its crispness, etc. However, the shadow will almost inevitably have a more cartoonish/cel-shaded aesthetic to it. This might fit exactly into your aesthetic goals for the figure --- or it might make your render look fake and funny, so you should exercise your own judgement! % Sometimes physically-accurate shadows can be too complicated and distracting, and you desire a more streamlined figure that's a blend between realistically ray-traced \& a diagram/didactic feel.
 
 \section{Function visualization}
 \label{sec:FunctionVisualization}
 
 \subsection{Setting colormaps}
-You can either set the control points of a \obj{Color Ramp} node \href{https://blender.stackexchange.com/a/261366}{using a Python script} (which I find confusing), or use an image as a color map via a \obj{Image Texture} node (which I find much easier.) 
+You can either set the control points of a \obj{Color Ramp} node \href{https://blender.stackexchange.com/a/261366}{using a Python script} (which I personally find confusing), or use an image as a color map via a \obj{Image Texture} node (which I find much easier.) 
 
 \href{https://matplotlib.org/stable/gallery/color/colormap_reference.html}{Matplotlib} has some examples of good color maps that are designed to be perceptually aligned with how the data might change. Many colormaps in Polyscope come from Matplotlib. Additionally, Mark has some \href{https://github.com/MarkGillespie/geoptic.js/blob/main/misc/generate_colormap_constant.py}{code} that samples from these colormaps and outputs a PNG; he has some examples \href{https://github.com/MarkGillespie/geoptic.js/tree/main/img/colormaps}{here}. 
 
@@ -631,6 +671,7 @@ Once you have the colormap image, simply add a \obj{Image Texture} node, select 
 {\bf Important:} Lights and materials will often interact with your colors in unexpected ways, leading to colors that are too washed out or too dark. This will look bad in a paper figure (Figure~\ref{fig:bad-color-management}), because your color bar legend will look like it's a different color than what's rendered on your surface:
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=4in]{images/bad-color-management.pdf}
     \caption{Bad color management! The texture-mapped colors look completely different than what they did originally.}
     \label{fig:bad-color-management}
@@ -639,6 +680,7 @@ Once you have the colormap image, simply add a \obj{Image Texture} node, select 
 There are two main things you must do to get more accurate color-mapping. First is go to \menu{Properties > Render Properties > Color Management} (\inlinepic{images/2022-06-17_render-properties-icon.png}.) There is something in the Render Properties called the ``View Transform'' whose default is set to a non-standard option for some reason. You must switch to ``Standard'', which will then convert colors to the display the ``standard'' way. There are also contrast settings there (``Look'') although I find that leaving the default option to ``None'' is sufficient. 
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=3in]{images/color-management.png}
     \caption{The Color Management settings.}
     \label{fig:color-management}
@@ -653,8 +695,9 @@ Further, to avoid the color of textures being washed out by the lights in your s
 Here is a better color-mapped surface:
 \begin{figure}[H]
     \centering
+    \captionsetup{width=0.8\textwidth}
     \includegraphics[width=4in]{images/better-color-management.png}
-    \caption{Better color management -- the colors now match better between the colorbar and the texture-mapped color on the surface. If you want, you can adjust the saturation, etc. of the final figure in Photoshop.}
+    \caption{Better color management --- the colors now match better between the colorbar and the texture-mapped color on the surface. If you want, you can adjust the saturation, etc. of the final figure in Photoshop.}
     \label{fig:better-color-management}
 \end{figure}
 
@@ -721,11 +764,9 @@ A possible downside of this method is that it's not so straightforward to contro
 \subsubsection{Using modular arithmetic}
 {\bf TODO:} Alternatively, you can also take mod 1 using a math node.
 
-\subsection{Accurate colormapping}
-
 \section{Materials}
 \label{sec:Materials}
-I usually just adjust the Specular, Roughness, and Clearcoat paramters of the \obj{Principal BSDF} node in the Shader until I'm happy with it.
+For paper figures, I almost always just adjust the Specular, Roughness, and Clearcoat parameters of the \obj{Principal BSDF} node in the Shader until I'm happy with it.
 
 \textbf{TODO:} PBR materials
 
@@ -813,7 +854,7 @@ It can be hard to tell if the lighting is correct in your scene just from the fi
     \includegraphics[width=6in]{images/2022-09-07_preview-in-compositor.png}
     \caption{Viewing a render with a transparent background against a white background in the Compositing editor.}
 \end{figure}
-{\bf TODO:} There's some weird gamma correction going on, so that the background isn't perfectly white. But this is better than nothing.
+{\bf TODO:} There's some weird gamma correction going on, so that the background isn't perfectly white --- I don't really use this method myself at the moment.
 
 \section{Viewport options}
 
@@ -840,7 +881,7 @@ You can also customize the vignetting in the viewport in \menu{Edit > Preference
 \section{Scripting}
 In theory, everything done using the Blender GUI can also be achieved via a Python script. Using a script is useful when you need to render many objects, and/or set similar rendering properties for each of them. You can look up documentation online about the \href{https://docs.blender.org/api/current/index.html}{Blender Python API}. Personally, I found it takes a definite effort to get the hang of scripting in Blender. It's helpful to start by trying to re-create a simple Blender example you have already done using the GUI -- for example, one of the examples in this document.
 
-Also, Python scripting is essentially a programmatic way to manipulate the Blender GUI. Therefore, one should learn to use Blender through the GUI first, before trying scripting. It's hard to know what to script without understanding how Blender expects objects to be manipulated.
+Also, Python scripting is essentially a programmatic way to manipulate the Blender GUI. Therefore, I expect it will be easier to learn to use Blender through the GUI first, before trying scripting. It's hard to know what to script without understanding how Blender expects objects to be manipulated.
 
 A tip mentioned by ``Linus'' in the 2022 SGP Discord server: Enable \menu{Preferences > Interface > Python tooltips}, and then hovering over UI elements will tell you how to access it with Python.
 
@@ -888,7 +929,7 @@ Toggle the camera view (Figure~\ref{fig:toggle-camera-view}) to view the object 
     \label{fig:rendered-viewport-shading}
 \end{figure}
 
-\subsection{How do I use a different camera to render images, without adjusting the current camera?}
+\subsection{How do I use a different camera to render images, without affecting existing cameras?}
 
 
 \section{Gotchas}
