@@ -522,7 +522,7 @@ Blender comes with a bunch of default materials and light sources. You can view 
 \subsection{Directional lighting}
 \label{sec:DirectionalLighting}
 
-For scenes focused on only one or a few items, instead of adding environment lights I almost always add specific, directional lights (typically area lights) to create aesthetically-pleasing self-shadows on the object, which I find gives the object a sense of ``3D-ness'' and ``3D placement''. 
+For scenes focused on only one or a few items, instead of adding environment lights I almost always add specific directional lights to create aesthetically-pleasing self-shadows on the object, which I find gives the object a better sense of ``3D-ness'' and ``3D placement''. 
 \begin{figure}[H]
     \centering
     \captionsetup{width=0.8\textwidth}
@@ -533,7 +533,7 @@ For scenes focused on only one or a few items, instead of adding environment lig
 \subsubsection{The area lights method}
 I rarely use this method, but I've listed it for completeness (I usually use Sun lights instead, described in Section~\ref{sec:TheSunLightMethod}.) 
 
-I add a few area lights to illuminate the object from multiple sides. A quick way to add more lights is to duplicate an existing light (\keys{Shift + D}.) I fiddle with the angle and power of the lights, toggling the camera view and using the ``Rendered'' viewport shading to see how the object looks (FAQ~\ref{sec:FAQ-camera-view}), until I'm reasonably satisfied that the object is well-lit (Figure~\ref{object-with-directional-lights}.) 
+I add a few area lights to illuminate the object from multiple sides. A quick way to add more lights is to duplicate an existing light (\keys{Shift + D}.) I fiddle with the angle and power of the lights, toggling the camera view and using the ``Rendered'' viewport shading to see how the object looks (FAQ~\ref{sec:FAQ-camera-view}), until I'm reasonably satisfied that the object is well-lit (Figure~\ref{fig:object-with-directional-lights}.) 
 \begin{figure}[H]
     \centering
     \captionsetup{width=0.8\textwidth}
@@ -593,7 +593,7 @@ To have the plane catch shadows but not actually be rendered in the final render
     \label{fig:shadow-catcher-option}
 \end{figure}
 
-Usually, the light settings that best illuminate the scene objects well, such as those shown in Figure~\ref{object-with-directional-lights}, are \textit{not} simultaneously ideal for generating clean-cut, well-positioned, aesthetically-pleasing cast shadows. I usually therefore create a second set of lights specifically for creating the shadow. To keep these lights logically separate from the original scene items, I add a new scene ``collection'' by right-clicking on ``Scene Collection'' in the \menu{Outliner} menu in the upper-right (Figure~\ref{adding-a-new-collection}.)
+Usually, the light settings that best illuminate the scene objects well, such as those shown in Figure~\ref{fig:object-with-directional-lights}, are \textit{not} simultaneously ideal for generating clean-cut, well-positioned, aesthetically-pleasing cast shadows. I usually therefore create a second set of lights specifically for creating the shadow. To keep these lights logically separate from the original scene items, I add a new scene ``collection'' by right-clicking on ``Scene Collection'' in the \menu{Outliner} menu in the upper-right (Figure~\ref{fig:adding-a-new-collection}.)
 \begin{figure}[H]
     \centering
     \captionsetup{width=0.8\textwidth}
@@ -601,7 +601,7 @@ Usually, the light settings that best illuminate the scene objects well, such as
     \caption{Adding a new collection.}
     \label{fig:adding-a-new-collection}
 \end{figure}
-To this new collection, I add all the objects that are needed to make the shadow: the ground plane; a copy of the scene object(s), and additional light(s) that I've fiddled around with and deemed to make a good shadow. If the scene object(s) are particularly high-resolution and adding copies of them would slow the Blender \& the rendering process down considerably, I just add lower-resolution versions of the objects (you don't need high-res objects to generate the shadows, which are fuzzy anyway!) Next, you want to select the ``Holdout'' option under \menu{Object Properties > Visibility}, which takes an object's occlusion into account in the render, without rendering the object itself:
+To this new collection, I add all the objects that are needed to make the shadow: the ground plane; a copy of the scene object(s), and additional light(s) that I've fiddled around with and deemed to make a good shadow. If the scene object(s) are particularly high-resolution and adding copies of them would slow the Blender and its rendering process down considerably, I just add lower-resolution versions of the objects (you don't need high-res objects to generate the shadows, which are fuzzy anyway!) Next, you want to select the ``Holdout'' option under \menu{Object Properties > Visibility}, which takes an object's occlusion into account in the render, without rendering the object itself:
 \begin{figure}[H]
     \centering
     \captionsetup{width=0.8\textwidth}
@@ -641,7 +641,7 @@ After rendering these two images separately, I composite these two images togeth
     \centering
     \captionsetup{width=0.8\textwidth}
     \includegraphics[width=3in]{images/final-render-with-shadow.png}
-    \caption{The rendered object composited with its shadow.}
+    \caption{A rendered object composited with its shadow. See also Figure~\ref{fig:DragonSunLit}.}
     \label{fig:final-render-with-shadow}
 \end{figure}
 
@@ -685,7 +685,7 @@ There are two main things you must do to get more accurate color-mapping. First 
     \caption{The Color Management settings.}
     \label{fig:color-management}
 \end{figure}
-Further, to avoid the color of textures being washed out by the lights in your scene, you must add a separate ``Emission'' node in your shader. Hook up the output of the texture map to the input of \obj{Emission}. Add a \obj{Mix Shader} node to mix the output of \obj{Emission} with that of \obj{BSDF}. Pure emission would shade the object perfectly according to the colors in the texture, but would ignore the effects of the BSDF shader; to strike a good balance, leave the strength of \obj{Emission} at 1, and usually a value of 0.5 in \obj{Mix Shader} is good enough. After adding an emission shader, you may have to re-adjust some of the specular/roughness settings in \obj{BSDF} to retain the material appearance from before.
+Further, to avoid the color of textures being washed out by the lights in your scene, you must add a separate ``Emission'' node in your shader. Hook up the output of the texture map to the input of \obj{Emission}. Add a \obj{Mix Shader} node to mix the output of \obj{Emission} with that of \obj{BSDF}. Pure emission would shade the object perfectly according to the colors in the texture, but would ignore the effects of the BSDF shader; to strike a good balance, leave the strength of \obj{Emission} at 1, and usually a value of 0.5 in \obj{Mix Shader} is good enough. After adding an emission shader, you may have to re-adjust some of the specular/roughness settings in \obj{BSDF} to retain the material appearance from before --- for this reason, I usually adjust emission settings before finalizing my material parameters.
 \begin{figure}[H]
     \centering
     \includegraphics[width=5in]{images/emission-shader.png}
@@ -697,17 +697,16 @@ Here is a better color-mapped surface:
     \centering
     \captionsetup{width=0.8\textwidth}
     \includegraphics[width=4in]{images/better-color-management.png}
-    \caption{Better color management --- the colors now match better between the colorbar and the texture-mapped color on the surface. If you want, you can adjust the saturation, etc. of the final figure in Photoshop.}
-    \label{fig:better-color-management}
+    \caption{Better color management --- the colors now match better between the colorbar and the texture-mapped color on the surface.}
 \end{figure}
 
 \subsection{Rendering isolines}
 Sometimes you want to render a scalar function on a mesh, and also display its isolines. A classic example is a distance function.
 
-\subsubsection{Using trig functions}
-To render isolines as darkened bands, I use the following method, which is based on tricks I picked up from looking at Iniqo Quilez's shaders on \href{shadertoy.com}{Shadertoy}. (There are also simpler methods, described below.) Essentially, the scalar function $\phi$ is color-mapped as usual. But $\phi$ also gets mapped via a periodic function, which darkens the color quantity at regularly-spaced intervals (regularly-spaced numerically, that is. Whether the isolines actually end up being regularly-spaced spatially depends on whether $\phi$ is a true distance function.)
+\subsubsection{Using trigonometric functions}
+To render isolines as darkened bands, I use the following method, which is based on tricks I picked up from looking at Inigo Quilez's shaders on \href{shadertoy.com}{Shadertoy}. (There are also simpler methods, described below.) Essentially, the scalar function $\phi$ is color-mapped as usual. But $\phi$ also gets mapped via a periodic function, which darkens the color quantity at regularly-spaced intervals (regularly-spaced numerically, that is. Whether the isolines actually end up being regularly-spaced spatially depends on whether $\phi$ is a true distance function.)
 
-For the periodic function, a sinusoid is perfect the job; its range will eventually get mapped to $[0,1]$, representing the darkening factor. The function $\sin$ is especially nice because $\sin(0)=0$, which avoids having an isoband straddle the zero-set of the function. The period length controls the width of the isobands, and the amplitude controls the darkness. The function that computes the darkening factor is as follows:
+For the periodic function, a sinusoid is perfect the job; its range will eventually get mapped to $[0,1]$, representing the darkening factor. The sine function is especially nice because $\sin(0)=0$, which avoids having an isoband straddle the zero-set of the function. The period length controls the width of the isobands, and the amplitude controls the darkness. The function that computes the darkening factor is as follows:
 % \begin{minted}[escapeinside=(**), mathescape=true]{c}
 % // smoothstep() smooths out the bands, which avoids artifacts
 % dark_factor((*$\phi$*)) = 1.0 - smoothstep(-a, a, (*$\sin(\omega\phi)$*))
